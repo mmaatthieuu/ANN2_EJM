@@ -2,14 +2,21 @@
 rng(1)
 
 %% Initialisation
+% Number of hidden nodes
 NodeNumber=100;
-MaxEpoch=20;
-LearningRate=0.05;
+% Number of epochs
+MaxEpoch=50;
+LearningRate=0.2;
+% Ratio of the NodeNumber to be considered as neibourhood initially
+%   i.e. 0.25 with NodeNumber=100 will give a neighbourhood of 
+%   +/-25 hidden nodes. The neighbourhood always decrease linearly to 0
+%   with the epochs
+NeighbourhoodInitialRation=0.25;
 
 %--------------------------------------------
 W=rand(NodeNumber,84);
 NextW=W;
-Neighbourhood=round(linspace(NodeNumber/2,0,MaxEpoch));
+Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,0,MaxEpoch));
 
 %% Loading dataset
 props=load('./datasets/animals.dat');
@@ -20,37 +27,64 @@ animals = textscan(fid,'%q');
 animals=animals{1};
 fclose(fid);
 
-% BestNode=zeros(size(animals));
+% Mostly to debug, keep track of the winning nodes at every epochs
+HISTORY=zeros(32,MaxEpoch+1);
 
 %% Training
 for epoch=1:MaxEpoch+1  % +1 for the final classification
     BestNode=zeros(size(animals));
     for animal=1:length(animals)
       
-        % Make the substraction of the line 'animal' to all the lines of W
+%         % Make the substraction of the line 'animal' to all the lines of W
         difference=W-props(animal,:);
         
-        % Sum the the columns
+%         % Sum the columns squared
         dist=sum(difference.^2,2);
-        
-        % Just to avoid picking the one of the considered animal
-        %   (which is 0 so minimal)
-        dist(animal)=max(dist);
         
 %         [~,closestNeighbour(animal)]=min(dist);
         [~,BestNode(animal)]=min(dist);
-        disp(BestNode(animal))
+%         disp(BestNode(animal))
         if epoch<=MaxEpoch
             % To avoid overbound
             iMin=max([1,BestNode(animal)-Neighbourhood(epoch)]);
             iMax=min([NodeNumber,BestNode(animal)+Neighbourhood(epoch)]);
+            
+            DeltaW=LearningRate*difference;
+            
+%             % To decrease deltaW the futherwe go from the winning node
+%             % Not required in the instructions but I tried to try to
+%             % compensate the bad results
+                h1=linspace(0,1,Neighbourhood(epoch));
+                h2=linspace(1,0,Neighbourhood(epoch));
 
-            DeltaW=LearningRate*(props(animal)-W);
-            NextW(iMin:iMax,:)=NextW(iMin:iMax,:)+DeltaW(iMin:iMax,:);
+                h1=h1(Neighbourhood(epoch)-(BestNode(animal)-iMin)+1:end);
+                h2=h2(1:iMax-BestNode(animal));
+                h=[ h1 1 h2];
+
+            
+%             % DECOMMENT THE WANTED ONE
+%             % Without weighting the neighbourhood (it's necessary to use a
+%             %   smaller LearningRate or NeighbourhoodInitialRation
+%             NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:);
+%             % Weighting the neighbourhood 
+            NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
+     
+     
         end
     end
-    W=NextW;
+%     % To prevent updating when printing the result
+    if epoch<MaxEpoch
+        W=NextW;
+    end
+%     %To debug
+        disp(epoch)
+        disp(iMin)
+        disp(iMax)
+    %     disp(max(dist))
+    %     disp(BestNode)
+%         out=sortrows([animals,num2cell(BestNode)],2);
+        HISTORY(:,epoch)=BestNode;
 end
 
-animalsxxx=[animals,num2cell(BestNode)];
-out=sortrows(animalsxxx,2)
+% Should be the only output
+out=sortrows([animals,num2cell(BestNode)],2)
