@@ -1,18 +1,19 @@
-x_train=(0:0.1:2*pi)';
+x_train=(0:0.1:2*pi)';    %train set
 f1_train=sin(2*x_train);   %sin(2x)
 f2_train=sign(f1_train);    %square(2x)
 
-%% 3.1 without noise
+%% 3.1 without noise   uncomment to use 
 % %test for sin(2x) without noise
-% nb_centers=12;
-% max_step = 2*pi  - 0.05;
-% step = max_step / nb_centers;
-% centers=(0.05:step:max_step);
+% % construction of the RBF units
+% nb_centers=12;                %nb of units
+% max_step = 2*pi  - 0.05;      %last unit center
+% step = max_step / nb_centers;    %step between 2 units
+% centers=(0.05:step:max_step);     %centers of the units
 % disp(length(centers))
-% sigma=1.0;
+% sigma=1.0;                            %width of the centers
 % W=least_squares_RBF(x_train,f1_train,centers,sigma);
 % Y = predict_RBF(x_train,W,centers,sigma);
-% res=mean(abs(f1_train-Y))
+% res=mean(abs(f1_train-Y))   %absolute error
 % % to be below 0.1 we need 6 units, below 0.01 : 10 and below 0.001:13
 % % units.
 
@@ -48,9 +49,9 @@ f2_train=sign(f1_train);    %square(2x)
 %% 3.2 with noise
 %rng(25);
 % x_test = (0.05:0.1:1)';
-% sigma_noise = sqrt(0.1);
-sigma_noise = 0.1;
-f1_train_noise = f1_train + normrnd(0.0, sigma_noise, size(x_train));
+sigma_noise = sqrt(0.1);
+
+f1_train_noise = f1_train + normrnd(0.0, sigma_noise, size(x_train)); %data with noise
 % f1_test = sin(2*x_test) + normrnd(0.0, sigma_noise, size(x_test));
 % 
 % %batch approach
