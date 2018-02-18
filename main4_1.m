@@ -4,19 +4,30 @@ rng(1)
 %% Initialisation
 % Number of hidden nodes
 NodeNumber=100;
+
 % Number of epochs
 MaxEpoch=50;
-LearningRate=0.2;
+
+LearningRate=0.1;
+
 % Ratio of the NodeNumber to be considered as neibourhood initially
 %   i.e. 0.25 with NodeNumber=100 will give a neighbourhood of 
 %   +/-25 hidden nodes. The neighbourhood always decrease linearly to 0
 %   with the epochs
 NeighbourhoodInitialRation=0.25;
 
+% Choose the style of neighbourhood:
+%         ____
+% 1) _____|   |______
+%          _
+% 2)______/ \_______
+%
+NeighbourhoodStyle=2;
+
 %--------------------------------------------
 W=rand(NodeNumber,84);
 NextW=W;
-Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,0,MaxEpoch));
+Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,1,MaxEpoch));
 
 %% Loading dataset
 props=load('./datasets/animals.dat');
@@ -36,7 +47,7 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
     for animal=1:length(animals)
       
 %         % Make the substraction of the line 'animal' to all the lines of W
-        difference=W-props(animal,:);
+        difference=(W-props(animal,:));
         
 %         % Sum the columns squared
         dist=sum(difference.^2,2);
@@ -62,13 +73,14 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
                 h=[ h1 1 h2];
 
             
-%             % DECOMMENT THE WANTED ONE
+            if NeighbourhoodStyle==1
 %             % Without weighting the neighbourhood (it's necessary to use a
 %             %   smaller LearningRate or NeighbourhoodInitialRation
-%             NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:);
+                NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:);
+            elseif NeighbourhoodStyle==2
 %             % Weighting the neighbourhood 
-            NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
-     
+                NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
+            end
      
         end
     end
@@ -77,9 +89,9 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
         W=NextW;
     end
 %     %To debug
-        disp(epoch)
-        disp(iMin)
-        disp(iMax)
+%         disp(epoch)
+%         disp(iMin)
+%         disp(iMax)
     %     disp(max(dist))
     %     disp(BestNode)
 %         out=sortrows([animals,num2cell(BestNode)],2);
