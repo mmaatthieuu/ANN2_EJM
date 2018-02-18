@@ -6,7 +6,7 @@ rng(1)
 NodeNumber=100;
 
 % Number of epochs
-MaxEpoch=50;
+MaxEpoch=20;
 
 LearningRate=0.1;
 
@@ -31,7 +31,7 @@ Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,1,MaxEpoch));
 
 %% Loading dataset
 props=load('./datasets/animals.dat');
-props=reshape(props,[32,84]);
+props=reshape(props,[84,32])';
 
 fid=fopen('./datasets/animalnames.txt');
 animals = textscan(fid,'%q');
@@ -50,7 +50,7 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
         difference=(W-props(animal,:));
         
 %         % Sum the columns squared
-        dist=sum(difference.^2,2);
+        dist=sum(abs(difference),2);
         
 %         [~,closestNeighbour(animal)]=min(dist);
         [~,BestNode(animal)]=min(dist);
@@ -61,7 +61,13 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
             iMax=min([NodeNumber,BestNode(animal)+Neighbourhood(epoch)]);
             
             DeltaW=LearningRate*difference;
+
             
+            if NeighbourhoodStyle==1
+%             % Without weighting the neighbourhood (it's necessary to use a
+%             %   smaller LearningRate or NeighbourhoodInitialRation
+                NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:);
+            elseif NeighbourhoodStyle==2
 %             % To decrease deltaW the futherwe go from the winning node
 %             % Not required in the instructions but I tried to try to
 %             % compensate the bad results
@@ -71,13 +77,6 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
                 h1=h1(Neighbourhood(epoch)-(BestNode(animal)-iMin)+1:end);
                 h2=h2(1:iMax-BestNode(animal));
                 h=[ h1 1 h2];
-
-            
-            if NeighbourhoodStyle==1
-%             % Without weighting the neighbourhood (it's necessary to use a
-%             %   smaller LearningRate or NeighbourhoodInitialRation
-                NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:);
-            elseif NeighbourhoodStyle==2
 %             % Weighting the neighbourhood 
                 NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
             end
