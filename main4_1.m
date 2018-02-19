@@ -26,8 +26,7 @@ NeighbourhoodStyle=2;
 
 %--------------------------------------------
 W=rand(NodeNumber,84);
-NextW=W;
-Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,1,MaxEpoch));
+Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,0,MaxEpoch));
 
 %% Loading dataset
 props=load('./datasets/animals.dat');
@@ -42,7 +41,7 @@ fclose(fid);
 HISTORY=zeros(32,MaxEpoch+1);
 
 %% Training
-for epoch=1:MaxEpoch+1  % +1 for the final classification
+for epoch=1:MaxEpoch 
     BestNode=zeros(size(animals));
     for animal=1:length(animals)
       
@@ -55,7 +54,6 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
 %         [~,closestNeighbour(animal)]=min(dist);
         [~,BestNode(animal)]=min(dist);
 %         disp(BestNode(animal))
-        if epoch<=MaxEpoch
             % To avoid overbound
             iMin=max([1,BestNode(animal)-Neighbourhood(epoch)]);
             iMax=min([NodeNumber,BestNode(animal)+Neighbourhood(epoch)]);
@@ -78,15 +76,14 @@ for epoch=1:MaxEpoch+1  % +1 for the final classification
                 h2=h2(1:iMax-BestNode(animal));
                 h=[ h1 1 h2];
 %             % Weighting the neighbourhood 
-                NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
+                W(iMin:iMax,:)=W(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
             end
-     
-        end
+    
     end
-%     % To prevent updating when printing the result
-    if epoch<MaxEpoch
-        W=NextW;
-    end
+% %     % To prevent updating when printing the result
+%     if epoch<MaxEpoch
+%         W=NextW;
+%     end
 %     %To debug
 %         disp(epoch)
 %         disp(iMin)
