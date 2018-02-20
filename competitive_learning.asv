@@ -1,0 +1,24 @@
+function centers = competitive_learning(centers, inputpattern, neighborhood, stepsize)
+% calculate distances
+distances = (sin(2*centers)-sin(2*inputpattern));
+min = []
+for i=1:length(centers)/4
+    [~, min(i)] = min(distances);
+    distances(min(i)) = [];
+[~, min2] = min(distances);
+if abs(centers(min1)-inputpattern) < abs(centers(min2)-inputpattern)
+    winner = min1;
+else
+    winner = min2;
+end
+% find and update neighours
+if neighborhood>0
+    for i=1:length(centers)
+        if abs(centers(winner)-centers(i)) <= neighborhood
+            centers(i) = centers(i) + stepsize * (inputpattern-centers(i));
+        end
+    end
+end
+% update winner
+centers(winner) = centers(winner) + stepsize * (inputpattern-centers(winner));
+end
