@@ -1,102 +1,72 @@
 %% Debug stuff
-% rng(400)
+%rng(12)
 
 %% Initialisation
 % Number of hidden nodes
-NodeNumber=100;
+NodeNumber=10;
 
 % Number of epochs
 MaxEpoch=50;
 
 LearningRate=0.15;
 
-% Ratio of the NodeNumber to be considered as neibourhood initially
-%   i.e. 0.25 with NodeNumber=100 will give a neighbourhood of 
-%   +/-25 hidden nodes. The neighbourhood always decrease linearly to 0
-%   with the epochs
-NeighbourhoodInitialRation=0.25;
-
-% Choose the style of neighbourhood:
-%         ____
-% 1) _____|   |______
-%          _
-% 2)______/ \_______
-%
-NeighbourhoodStyle=1;
+NeighbourhoodMax=3;  %max radius of neighbourhood
 
 %--------------------------------------------
-W=rand(NodeNumber,31);
-Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,1,MaxEpoch));
+W=rand(NodeNumber*NodeNumber,31);
+Neighbourhood=round(linspace(NeighbourhoodMax,0,MaxEpoch));
 
 %% Loading dataset
 votes=load('./datasets/votes.dat');
 votes=reshape(votes,[31,349])';
 
-fid=fopen('./datasets/animalnames.txt');
-animals = textscan(fid,'%q');
-animals=animals{1};
-fclose(fid);
+nb_param = 31;
+nb_mp = 349;
 
-% Mostly to debug, keep track of the winning nodes at every epochs
-HISTORY=zeros(32,MaxEpoch+1);
+parties=load('./datasets/mpparty.dat');
+sex = load('./datasets/mpsex.dat');
+district = load('./datasets/mpdistrict.dat');
+
 
 %% Training
-for epoch=1:MaxEpoch+1  % +1 for the final classification
-    BestNode=zeros(size(animals));
-    for animal=1:length(animals)
-      
-%         % Make the substraction of the line 'animal' to all the lines of W
-        difference=(W-votes(animal,:));
+for epoch=1:MaxEpoch+1
+    BestNode=zeros(nb_mp,1);
+    BestPos=zeros(nb_mp,2);
+    for mp=1:nb_mp
         
-%         % Sum the columns squared
-%        dist=sum(difference.^2,2);
+        %         % Make the substraction of the line 'animal' to all the lines of W
+        difference=(W-votes(mp,:));
+        
+
         dist = sum(abs(difference),2);
-%         [~,closestNeighbour(animal)]=min(dist);
-        [~,BestNode(animal)]=min(dist);
-%         disp(BestNode(animal))
-        if epoch<=MaxEpoch
-            % To avoid overbound
-            iMin=max([1,BestNode(animal)-Neighbourhood(epoch)]);
-            iMax=min([NodeNumber,BestNode(animal)+Neighbourhood(epoch)]);
-            
+        [~,BestNode(mp)]=min(dist);
+       
+        i_best = floor((BestNode(mp)-1)/NodeNumber) + 1;
+        j_best = mod((BestNode(mp)-1),NodeNumber) + 1;
+        BestPos(mp,:)=[i_best; j_best];
+        if epoch <= MaxEpoch   %update not at the last time
             DeltaW=LearningRate*difference;
-            
-%             % To decrease deltaW the futherwe go from the winning node
-%             % Not required in the instructions but I tried to try to
-%             % compensate the bad results
-                h1=linspace(0,1,Neighbourhood(epoch));
-                h2=linspace(1,0,Neighbourhood(epoch));
 
-                h1=h1(Neighbourhood(epoch)-(BestNode(animal)-iMin)+1:end);
-                h2=h2(1:iMax-BestNode(animal));
-                h=[ h1 1 h2];
-
-            
-            if NeighbourhoodStyle==1
-%             % Without weighting the neighbourhood (it's necessary to use a
-%             %   smaller LearningRate or NeighbourhoodInitialRation
-                %NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:);
-                W(iMin:iMax,:)=W(iMin:iMax,:)-DeltaW(iMin:iMax,:);
-            elseif NeighbourhoodStyle==2
-%             % Weighting the neighbourhood 
-                NextW(iMin:iMax,:)=NextW(iMin:iMax,:)-DeltaW(iMin:iMax,:).*h';
-            end
-     
+            for ii=1:NodeNumber
+                for jj = 1:NodeNumber
+                    if abs(ii-i_best) + abs(jj-j_best) <= Neighbourhood(epoch)
+                        ind = (ii -1)*NodeNumber + jj;
+                        W(ind,:) = W(ind,:) - DeltaW(ind,:);
+                    end
+                end
+            end  
         end
     end
-%     % To prevent updating when printing the result
-%     if epoch<MaxEpoch
-%         W=NextW;
-%     end
-%     %To debug
-%         disp(epoch)
-%         disp(iMin)
-%         disp(iMax)
-    %     disp(max(dist))
-    %     disp(BestNode)
-%         out=sortrows([animals,num2cell(BestNode)],2);
-        HISTORY(:,epoch)=BestNode;
 end
 
 % Should be the only output
-out=sortrows([animals,num2cell(BestNode)],2)
+BestPos = BestPos + (rand(size(BestPos)) - 0.5);
+figure(1)
+gscatter(BestPos(:,1), BestPos(:,2),parties);
+legend('no party','m','fp','s','v','mp','kd','c');
+figure(2)
+gscatter(BestPos(:,1), BestPos(:,2),sex);
+legend('male','female')
+figure(3)
+gscatter(BestPos(:,1), BestPos(:,2),district);
+
