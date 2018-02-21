@@ -1,0 +1,8 @@
+function new_centers = comp3(centers, x, y, W, sigma)
+projected = predict_RBF(centers, W, centers, sigma);
+disp(projected)
+distances = zeros(shape(centers, 1),1)
+for i = 1:
+disp(distances)
+new_centers = 0;
+end

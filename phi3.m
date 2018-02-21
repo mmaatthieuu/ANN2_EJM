@@ -9,6 +9,6 @@ h = size(mu, 1);
 phi = zeros(n,h);
 for i = 1:n
     for j = 1:h
-        phi(i,j) = exp(-(x(i,:)-mu(j,:))*(x(i,:)-mu(j,:))'/(2*sig(j)^2));
+        phi(i,j) = exp(-(x(i,:)-mu(j,:))*(x(i,:)-mu(j,:))'/(2*sig^2));
     end
 end
