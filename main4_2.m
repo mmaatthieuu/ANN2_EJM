@@ -2,10 +2,10 @@
 
 close all
 
-animation=true;
-plotWeight=true;
+animation=false;
+plotWeight=false;
 
-LearningRate=0.5;
+LearningRate=0.2;
 % Number of hidden nodes
 NodeNumber=50;
 % % Number of epochs
@@ -43,7 +43,7 @@ BestNodeArray=zeros(length(cities),1);
 figure
 hold on
 
-for epoch=1:MaxEpoch
+for epoch=1:MaxEpoch+1
     hold on
     for city=1:length(cities)
         
@@ -52,14 +52,16 @@ for epoch=1:MaxEpoch
         [~,BestNode]=min(dist);
         BestNodeArray(city)=BestNode;
         
+        if epoch<=MaxEpoch
         difference=(W-cities(city,:));
         W(circ(BestNode-Nbrhd):circ(BestNode+Nbrhd),:)=...
             W(circ(BestNode-Nbrhd):circ(BestNode+Nbrhd),:)-...
             LearningRate*difference(circ(BestNode-Nbrhd):circ(BestNode+Nbrhd),:);
         
-        tour(city,:)=W(BestNode,:)
+        tour(city,:)=W(BestNode,:);
         
         tour(end,:)=tour(1,:);
+        end
         
         
         if animation && epoch>1

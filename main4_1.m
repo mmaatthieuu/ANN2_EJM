@@ -1,5 +1,5 @@
 %% Debug stuff
-rng(1)
+% rng(1)
 
 %% Initialisation
 % Number of hidden nodes
@@ -93,6 +93,23 @@ for epoch=1:MaxEpoch
 %         out=sortrows([animals,num2cell(BestNode)],2);
         HISTORY(:,epoch)=BestNode;
 end
+textpos=zeros(size(BestNode))+0.02;
+BestNodeS=sort(BestNode);
+for i=2:length(BestNodeS)
+   if BestNodeS(i)==BestNodeS(i-1)
+      textpos(i)= textpos(i-1)+0.05;
+   end
+end
 
 % Should be the only output
 out=sortrows([animals,num2cell(BestNode)],2)
+figure;
+hold on
+plot(BestNodeS,zeros(size(BestNode)),'o')
+text(BestNodeS,textpos,out(:,1),'rotation',50,'fontsize',12)
+plot([min(BestNode) max(BestNode)] ,[0 0],'k-')
+for  i=1:length(BestNodeS)
+    plot([BestNodeS(i) BestNodeS(i)],[0 textpos(i)],'k-.')
+end
+xlim([min(BestNode)-1 max(BestNode)+5]);
+ylim([-0.2 0.6]);
