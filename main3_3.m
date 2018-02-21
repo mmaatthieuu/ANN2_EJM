@@ -1,7 +1,7 @@
 % training data input
 x_train=(0:0.1:2*pi)';
 % training data target
-y_train=sin(2*x_train) %+ normrnd(0.0, 0.3, size(x_train));
+y_train=sin(2*x_train) + normrnd(0.0, 0.3, size(x_train));
 
 % number of centers
 nb_centers=5;
@@ -15,11 +15,11 @@ centers=(0.05:step:max_step);
 sigma=1.0;
 
 centers_adjusted = centers;
+rounds = 100000;
 % initial maximum distance from included neighbors to winners
 neighbor_distance = 0%max_step/2;
 % distance decreases linearly by this
 neighbor_distance_step = neighbor_distance/rounds;
-rounds = 100000;
 for i=1:rounds
     centers_adjusted = competitive_learning(centers_adjusted, datasample(x_train, 1), neighbor_distance, 0.2);
     neighbor_distance = neighbor_distance - neighbor_distance_step;
