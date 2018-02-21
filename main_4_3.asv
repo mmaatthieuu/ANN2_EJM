@@ -1,5 +1,5 @@
 %% Debug stuff
-%rng(12)
+% rng(400)
 
 %% Initialisation
 % Number of hidden nodes
@@ -10,11 +10,23 @@ MaxEpoch=50;
 
 LearningRate=0.15;
 
-NeighbourhoodMax=3;  %max radius of neighbourhood
+% Ratio of the NodeNumber to be considered as neibourhood initially
+%   i.e. 0.25 with NodeNumber=100 will give a neighbourhood of
+%   +/-25 hidden nodes. The neighbourhood always decrease linearly to 0
+%   with the epochs
+NeighbourhoodInitialRation=0.25;
+
+% Choose the style of neighbourhood:
+%         ____
+% 1) _____|   |______
+%          _
+% 2)______/ \_______
+%
+NeighbourhoodStyle=1;
 
 %--------------------------------------------
 W=rand(NodeNumber*NodeNumber,31);
-Neighbourhood=round(linspace(NeighbourhoodMax,0,MaxEpoch));
+Neighbourhood=round(linspace(NodeNumber*NeighbourhoodInitialRation,1,MaxEpoch));
 
 %% Loading dataset
 votes=load('./datasets/votes.dat');
@@ -24,8 +36,8 @@ nb_param = 31;
 nb_mp = 349;
 
 parties=load('./datasets/mpparty.dat');
-sex = load('./datasets/mpsex.dat');
-district = load('./datasets/mpdistrict.dat');
+
+
 
 
 %% Training
@@ -60,13 +72,6 @@ for epoch=1:MaxEpoch+1
 end
 
 % Should be the only output
-BestPos = BestPos + (rand(size(BestPos)) - 0.5);
-figure(1)
+BestPos = BestPos + rand(size(BestPos)) -
 gscatter(BestPos(:,1), BestPos(:,2),parties);
-legend('no party','m','fp','s','v','mp','kd','c');
-figure(2)
-gscatter(BestPos(:,1), BestPos(:,2),sex);
-legend('male','female')
-figure(3)
-gscatter(BestPos(:,1), BestPos(:,2),district);
 
