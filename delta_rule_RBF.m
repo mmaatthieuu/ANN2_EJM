@@ -18,9 +18,9 @@ for ii = 1:nb_epochs
     end
     error(ii) = mean(abs(F - phi*W));
 end
-% figure(2)
-% hold on
-% plot(error) %(uncomment to plot the error)
-
+figure(2)
+hold on
+plot(error) %(uncomment to plot the error)
+set(gca,'fontsize',14)
 end
 
