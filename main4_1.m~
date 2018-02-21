@@ -93,11 +93,11 @@ for epoch=1:MaxEpoch
 %         out=sortrows([animals,num2cell(BestNode)],2);
         HISTORY(:,epoch)=BestNode;
 end
-textpos=zeros(size(BestNode))+0.02;
+textpos=zeros(size(BestNode))+0.05;
 BestNodeS=sort(BestNode);
 for i=2:length(BestNodeS)
    if BestNodeS(i)==BestNodeS(i-1)
-      textpos(i)= textpos(i-1)+0.05;
+      textpos(i)= textpos(i-1)+0.1;
    end
 end
 
@@ -106,10 +106,10 @@ out=sortrows([animals,num2cell(BestNode)],2)
 figure;
 hold on
 plot(BestNodeS,zeros(size(BestNode)),'o')
-text(BestNodeS,textpos,out(:,1),'rotation',50,'fontsize',12)
+text(BestNodeS,textpos,out(:,1),'rotation',50)
 plot([min(BestNode) max(BestNode)] ,[0 0],'k-')
 for  i=1:length(BestNodeS)
-    plot([BestNodeS(i) BestNodeS(i)],[0 textpos(i)],'k-.')
+    plot([BestNodeS(])
 end
-xlim([min(BestNode)-1 max(BestNode)+5]);
+xlim([0 max(BestNode)+5]);
 ylim([-0.2 0.6]);
