@@ -2,20 +2,20 @@
 
 close all
 
-animation=true;
+animation=false;
 plotWeight=true;
 
-LearningRate=0.1;
+LearningRate=0.2;
 % Number of hidden nodes
-NodeNumber=100;
+NodeNumber=1000;
 % % Number of epochs
-MaxEpoch=50;
+MaxEpoch=20;
 
 % "circle", "random" or "uniform"
 InitialDistribution="circle";
 
 % Neighbourhood
-Nbrhd=round(linspace(NodeNumber*0.1,0,MaxEpoch));
+Nbrhd=round(linspace(NodeNumber*0.2,0,MaxEpoch));
 
 
 
@@ -28,7 +28,7 @@ if InitialDistribution=="circle"
 elseif InitialDistribution=="random"
     W=rand(NodeNumber,2);
 elseif InitialDistribution=="uniform"
-    [X,Y]=meshgrid(linspace(0,1,round(sqrt(NodeNumber))));
+    [X,Y]=meshgrid(linspace(-1,2,round(sqrt(NodeNumber))));
     W=[reshape(X,[],1) reshape(Y,[],1)];
 end
 
@@ -102,6 +102,7 @@ tour=sortrows([cities BestNodeArray],3);
 tour(end+1,:)=tour(1,:);
 
 figure;
+set(gca,'FontSize',14)
 plot(tour(:,1),tour(:,2));
 hold on
 scatter(cities(:,1), cities(:,2))
